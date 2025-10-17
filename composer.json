@@ -1,13 +1,17 @@
 {
-  "name": "imxieke/dev-template-php",
-  "description": "PHP Project Template",
+  "name": "ext/http",
+  "description": "Http Client",
   "type": "library",
   "license": "MIT",
   "homepage": "https://github.com/imxieke/php-template",
   "keywords": [
     "php",
-    "project",
-    "template"
+    "curl",
+    "http",
+    "guzzle",
+    "http-client",
+    "curl-client",
+    "stream"
   ],
   "authors": [
     {
@@ -18,22 +22,29 @@
     }
   ],
   "require": {
-    "php": ">=8.1.8"
+    "php": ">=8.2",
+    "ext-curl": "*",
+    "composer/ca-bundle": "^1.5",
+    "ext/exception": "^0.0.2",
+    "guzzlehttp/guzzle": "^7.10",
+    "psr/http-message": "^2.0",
+    "symfony/http-foundation": "^7.3"
   },
   "require-dev": {
-    "filp/whoops": "^2.14",
     "mockery/mockery": "^1.6",
     "phpunit/phpunit": "^10.2.4",
-    "monolog/monolog": "^3.3.0",
     "phpstan/phpstan": "^1.10.18",
-    "symfony/var-dumper": "^6.3.5",
-    "vimeo/psalm": "^5.10.0"
+    "symfony/var-dumper": "^6.3.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Zeus\\Http\\": "src/"
+    },
+    "files": []
   },
   "scripts": {
     "test": "phpunit --colors",
-    "psalm": "psalm --show-info=true --no-cache",
-    "psalm-fix": "psalm --no-cache --alter --issues=MissingReturnType,MissingParamType",
-	"phpstan": "vendor/bin/phpstan analyze src/ --memory-limit 512M --level 9"
+    "phpstan": "vendor/bin/phpstan analyze src/ --memory-limit 512M --level 9"
   },
   "scripts-descriptions": {
     "test": "Run all tests."
