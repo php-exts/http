@@ -5,6 +5,7 @@ namespace Zeus\Http;
 
 use Zeus\Http\StatusCode;
 use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\RequestOptions;
 
 /**
  * Http Client Adapter
@@ -65,6 +66,15 @@ class Adapter
     protected string $url;
 
     /**
+     * Base Uri
+     *
+     * @var string
+     * @author CloudFlying
+     * @date 2025/10/18 00:15:37
+     */
+    protected string $baseUri;
+
+    /**
      * Request Params
      *
      * @var string
@@ -103,6 +113,15 @@ class Adapter
     public bool $thorwError = false;
 
     /**
+     * Http Options
+     *
+     * @var array
+     * @author CloudFlying
+     * @date 2025/10/18 00:06:02
+     */
+    protected array $options = [];
+
+    /**
      * Response Object
      *
      * @var ResponseInterface
@@ -118,16 +137,26 @@ class Adapter
      */
     protected $client;
 
-    /**
-     * 获取请求超时时间
-     *
-     * @return int
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/17 18:16:48
-     */
-    public function getTimeout()
+    public function setBaseUri(string $uri)
     {
-        return $this->timeout;
+        $this->baseUri;
+        $this->options['base_uri'] = $uri;
+        return $this;
+    }
+
+    /**
+     * Set Header
+     *
+     * @param string $key Header Key
+     * @param string $value Header Value
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/18 00:16:55
+     */
+    public function withHeader(string $key, string $value)
+    {
+        $this->headers[$key] = $value;
+        return $this;
     }
 
     /**
@@ -141,12 +170,102 @@ class Adapter
     public function setTimeout(int|float $timeout)
     {
         $this->timeout = $timeout;
+        $this->options['timeout'] = $timeout;
         return $this;
     }
 
-    public function error(bool $error = true)
+    /**
+     * Set Http Request Body
+     *
+     * @param array $body
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/18 00:19:10
+     */
+    public function withBody(array $body)
     {
-        $this->thorwError = $error;
+        $this->options['body'] = $body;
+        return $this;
+    }
+
+    /**
+     * Set Http GET Request Query
+     *
+     * @param array $query
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/18 00:20:03
+     */
+    public function withQuery(array $query)
+    {
+        $this->options['query'] = $query;
+        return $this;
+    }
+
+    /**
+     * Set Http Request Json Body
+     *
+     * @param array $data
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/18 00:20:44
+     */
+    public function withJson(array $data)
+    {
+        $this->options['json'] = $data;
+        return $this;
+    }
+
+    /**
+     * Throw Error ?
+     *
+     * @param bool $error
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/18 00:23:22
+     */
+    public function withError(bool $error = true)
+    {
+        $this->options[RequestOptions::HTTP_ERRORS] = $error;
+        return $this;
+    }
+
+    public function withBasicAuth(string $username, string $password)
+    {
+        $this->options['auth'] = [$username, $password];
+        return $this;
+    }
+
+    public function withDigestAuth(string $username, string $password)
+    {
+        $this->options['auth'] = [$username, $password, 'digest'];
+        return $this;
+    }
+
+    public function withUserAgent(string $userAgent)
+    {
+        $this->options['headers']['User-Agent'] = $userAgent;
+        return $this;
+    }
+
+    /**
+     * Set Client Options
+     *
+     * @param array $options
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/18 00:30:44
+     */
+    public function withOptions(array $options)
+    {
+        $this->options = array_merge($this->options, $options);
+        return $this;
+    }
+
+    public function withCookies(array $cookies)
+    {
+        $this->cookies = $cookies;
+        $this->options['cookies'] = $cookies;
         return $this;
     }
 }

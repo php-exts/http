@@ -6,16 +6,17 @@ namespace Zeus\Http\Adapter;
 use Zeus\Http\Adapter;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Event\CompleteEvent;
-use GuzzleHttp\Event\MessageCompleteEvent;
-use GuzzleHttp\Message\Response;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\RequestOptions;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Promise\PromiseInterface;
-use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Message\Response;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Event\CompleteEvent;
+use GuzzleHttp\Event\MessageCompleteEvent;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Guzzle Http Adapter
@@ -47,6 +48,23 @@ class Guzzle extends Adapter
     public function __construct()
     {
         $this->client = new Client();
+    }
+
+    /**
+     * Add Middleware
+     *
+     * @param callable $middleware
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/18 00:29:46
+     */
+    public function withMiddleware(callable $middleware)
+    {
+        $handler = $this->client->getConfig('handler');
+        if ($handler instanceof HandlerStack) {
+            $handler->push($middleware);
+        }
+        return $this;
     }
 
     /**
