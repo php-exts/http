@@ -5,6 +5,7 @@ namespace Zeus\Http;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\RequestInterface;
+use Zeus\Exception\MethodNotFoundException;
 
 /**
  * Request
