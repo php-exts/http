@@ -251,7 +251,7 @@ class Adapter
      *
      * @var object
      */
-    protected object $client;
+    protected $client;
 
     public function setBaseUri(string $uri)
     {
@@ -319,7 +319,7 @@ class Adapter
      * @author imxieke <oss@live.hk>
      * @date 2025/10/18 11:45:42
      */
-    public function withDebug(bool $debug = false)
+    public function withDebug(bool $debug = true)
     {
         $this->debug = $debug;
         return $this;
@@ -368,6 +368,20 @@ class Adapter
     public function withHeaders(array $headers)
     {
         $this->options['headers'] = array_merge($this->options['headers'], $headers);
+        return $this;
+    }
+
+    /**
+     * Set Http Request Bearer Header
+     *
+     * @param string $token
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/18 11:29:23
+     */
+    public function withBearerHeader(string $token)
+    {
+        $this->withHeader("Authorization", "Bearer {$token}");
         return $this;
     }
 
@@ -452,6 +466,7 @@ class Adapter
     {
         $this->options['json'] = $data;
         $this->withHeader('Content-Type', 'application/json');
+        $this->withHeader('Accept', 'application/json');
         return $this;
     }
 

@@ -243,6 +243,7 @@ class Curl extends Adapter
         $this->setOpt(CURLOPT_VERBOSE, $this->debug);
         if(! empty($this->options['cookie_file'])) {
             $this->setOpt(CURLOPT_COOKIEFILE, $this->options['cookie_file']);
+            $this->setOpt(CURLOPT_COOKIEJAR, $this->options['cookie_file']);
         }
         if(! empty($this->options['cookie'])) {
             $this->setOpt(CURLOPT_COOKIE, $this->options['cookie']);
@@ -255,9 +256,6 @@ class Curl extends Adapter
     /**
      * 发起请求
      *
-     * #TODO CURLOPT_COOKIEFILE
-     * #TODO CURLOPT_COOKIEJAR
-     * #TODO CURLOPT_RETURNTRANSFER bool
      * #TODO CURLOPT_ENCODING
      *
      * @param string $method Request Method
@@ -273,7 +271,12 @@ class Curl extends Adapter
             throw new InvalidParamException("Uri Can't be null");
         }
 
-        $this->url = strpos($uri, "://") ? $uri : $this->options['base_uri'] . $uri;
+        if (!empty($uri)) {
+            $this->url = strpos($uri, "://") ? $uri : $this->options['base_uri'] . $uri;
+        }else {
+            $this->url = $this->options['base_uri'];
+        }
+
         $this->build($method);
 
         $this->body   = curl_exec($this->client);
@@ -284,6 +287,8 @@ class Curl extends Adapter
 
         $this->info  = curl_getinfo($this->client);
         $this->httpCode = $this->info['http_code'] ?? 200;
+
+        // dump(curl_getinfo($this->client, CURLINFO_HEADER_SIZE));
 
         $this->close();
         return $this;

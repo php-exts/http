@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "804a11cd0390e0e7f934db258b043d21",
+    "content-hash": "bbb4a7866a0b77d1af5c352a8b858332",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -80,16 +80,16 @@
         },
         {
             "name": "ext/exception",
-            "version": "0.0.2",
+            "version": "0.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-exts/exception.git",
-                "reference": "1ae23278571d5581f94c046871bbeaba6c59941f"
+                "reference": "e5648474ca5eb8a5ee5cb219fdef27f0a9c0e027"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-exts/exception/zipball/1ae23278571d5581f94c046871bbeaba6c59941f",
-                "reference": "1ae23278571d5581f94c046871bbeaba6c59941f",
+                "url": "https://api.github.com/repos/php-exts/exception/zipball/e5648474ca5eb8a5ee5cb219fdef27f0a9c0e027",
+                "reference": "e5648474ca5eb8a5ee5cb219fdef27f0a9c0e027",
                 "shasum": ""
             },
             "require": {
@@ -129,9 +129,9 @@
             ],
             "support": {
                 "issues": "https://github.com/php-exts/exception/issues",
-                "source": "https://github.com/php-exts/exception/tree/0.0.2"
+                "source": "https://github.com/php-exts/exception/tree/0.0.4"
             },
-            "time": "2025-10-17T06:42:07+00:00"
+            "time": "2025-10-18T02:47:34+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

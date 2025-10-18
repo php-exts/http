@@ -43,7 +43,7 @@ class Guzzle extends Adapter
      * @author CloudFlying
      * @date 2025/10/17 18:27:57
      */
-    protected $client;
+    protected Client $client;
 
     public function __construct()
     {
