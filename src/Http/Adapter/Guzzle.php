@@ -10,6 +10,9 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Message\Response;
+use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\FileCookieJar;
+use GuzzleHttp\Cookie\SessionCookieJar;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -17,6 +20,8 @@ use GuzzleHttp\Event\CompleteEvent;
 use GuzzleHttp\Event\MessageCompleteEvent;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request as Psr7Request;
+use GuzzleHttp\Psr7\Response as Psr7Response;
 
 /**
  * Guzzle Http Adapter
@@ -108,19 +113,19 @@ class Guzzle extends Adapter
     }
 
     /**
-     * 获取请求结果
+     * Query Response Contents
      *
      * @return string
      * @author imxieke <oss@live.hk>
      * @date 2025/10/17 19:32:36
      */
-    public function getContents()
+    public function getContents(): string
     {
         return $this->response->getBody()->getContents();
     }
 
     /**
-     * 结果转字符串
+     * Result Convert to String
      *
      * @return string
      * @author imxieke <oss@live.hk>

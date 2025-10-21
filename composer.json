@@ -38,7 +38,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Zeus\\Http\\": "src/"
+      "Zeus\\": "src/"
     },
     "files": []
   },

@@ -1,7 +1,7 @@
 <?php
 declare (strict_types = 1);
 
-namespace Zeus\Http;
+namespace Zeus\Http\Trait;
 
 /**
  * Http Status Code
@@ -256,6 +256,30 @@ trait StatusCode
     }
 
     /**
+     * Is Redirect ?
+     * @param mixed $location
+     * @return bool
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/17 17:05:29
+     */
+    public function isRedirect(?string $location = null): bool
+    {
+        return \in_array($this->statusCode, [201, 301, 302, 303, 307, 308]);
+    }
+
+    /**
+     * Response Is Empty ?
+     *
+     * @return bool
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/17 17:06:17
+     */
+    public function isEmpty(): bool
+    {
+        return in_array($this->statusCode, [204, 304]);
+    }
+
+    /**
      * Response Is OK ?
      *
      * @return bool
@@ -265,6 +289,101 @@ trait StatusCode
     public function isOk(): bool
     {
         return 200 === $this->statusCode;
+    }
+
+    public function isCreated(): bool
+    {
+        return 201 === $this->statusCode;
+    }
+
+    public function isAccepted(): bool
+    {
+        return 202 === $this->statusCode;
+    }
+
+    public function isNoContent(): bool
+    {
+        return 204 === $this->statusCode;
+    }
+
+    public function isResetContent(): bool
+    {
+        return 205 === $this->statusCode;
+    }
+
+    public function isPartialContent(): bool
+    {
+        return 206 === $this->statusCode;
+    }
+
+    public function isMultiStatus(): bool
+    {
+        return 207 === $this->statusCode;
+    }
+
+    public function isAlreadyReported(): bool
+    {
+        return 208 === $this->statusCode;
+    }
+
+    public function isIMUsed(): bool
+    {
+        return 226 === $this->statusCode;
+    }
+
+    public function isMultipleChoices(): bool
+    {
+        return 300 === $this->statusCode;
+    }
+
+    public function isMovedPermanently(): bool
+    {
+        return 301 === $this->statusCode;
+    }
+
+    public function isFound(): bool
+    {
+        return 302 === $this->statusCode;
+    }
+
+    public function isNotModified(): bool
+    {
+        return 304 === $this->statusCode;
+    }
+
+    public function isUseProxy(): bool
+    {
+        return 305 === $this->statusCode;
+    }
+
+    public function isSwitchProxy(): bool
+    {
+        return 306 === $this->statusCode;
+    }
+
+    public function isTemporaryRedirect(): bool
+    {
+        return 307 === $this->statusCode;
+    }
+
+    public function isPermanentRedirect(): bool
+    {
+        return 308 === $this->statusCode;
+    }
+
+    public function isBadRequest(): bool
+    {
+        return 400 === $this->statusCode;
+    }
+
+    public function isUnauthorized(): bool
+    {
+        return 401 === $this->statusCode;
+    }
+
+    public function isPaymentRequired(): bool
+    {
+        return 402 === $this->statusCode;
     }
 
     /**
@@ -291,27 +410,178 @@ trait StatusCode
         return 404 === $this->statusCode;
     }
 
-    /**
-     * Is Redirect ?
-     * @param mixed $location
-     * @return bool
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/17 17:05:29
-     */
-    public function isRedirect(?string $location = null): bool
+    public function isMethodNotAllowed(): bool
     {
-        return \in_array($this->statusCode, [201, 301, 302, 303, 307, 308]);
+        return 405 === $this->statusCode;
     }
 
-    /**
-     * Response Is Empty ?
-     *
-     * @return bool
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/17 17:06:17
-     */
-    public function isEmpty(): bool
+    public function isNotAcceptable(): bool
     {
-        return \in_array($this->statusCode, [204, 304]);
+        return 406 === $this->statusCode;
+    }
+
+    public function isProxyAuthenticationRequired(): bool
+    {
+        return 407 === $this->statusCode;
+    }
+
+    public function isRequestTimeout(): bool
+    {
+        return 408 === $this->statusCode;
+    }
+
+    public function isConflict(): bool
+    {
+        return 409 === $this->statusCode;
+    }
+
+    public function isGone(): bool
+    {
+        return 410 === $this->statusCode;
+    }
+
+    public function isLengthRequired(): bool
+    {
+        return 411 === $this->statusCode;
+    }
+
+    public function isPreconditionFailed(): bool
+    {
+        return 412 === $this->statusCode;
+    }
+
+    public function isPayloadTooLarge(): bool
+    {
+        return 413 === $this->statusCode;
+    }
+
+    public function isURITooLong(): bool
+    {
+        return 414 === $this->statusCode;
+    }
+
+    public function isUnsupportedMediaType(): bool
+    {
+        return 415 === $this->statusCode;
+    }
+
+    public function isRangeNotSatisfiable(): bool
+    {
+        return 416 === $this->statusCode;
+    }
+
+    public function isExpectationFailed(): bool
+    {
+        return 417 === $this->statusCode;
+    }
+
+    public function isImATeapot(): bool
+    {
+        return 418 === $this->statusCode;
+    }
+
+    public function isMisdirectedRequest(): bool
+    {
+        return 421 === $this->statusCode;
+    }
+
+    public function isUnprocessableContent(): bool
+    {
+        return 422 === $this->statusCode;
+    }
+
+    public function isLocked(): bool
+    {
+        return 423 === $this->statusCode;
+    }
+
+    public function isFailedDependency(): bool
+    {
+        return 424 === $this->statusCode;
+    }
+
+    public function isTooEarly(): bool
+    {
+        return 425 === $this->statusCode;
+    }
+
+    public function isUpgradeRequired(): bool
+    {
+        return 426 === $this->statusCode;
+    }
+
+    public function isPreconditionRequired(): bool
+    {
+        return 428 === $this->statusCode;
+    }
+
+    public function isTooManyRequests(): bool
+    {
+        return 429 === $this->statusCode;
+    }
+
+    public function isRequestHeaderFieldsTooLarge(): bool
+    {
+        return 431 === $this->statusCode;
+    }
+
+    public function isUnavailableForLegalReasons(): bool
+    {
+        return 451 === $this->statusCode;
+    }
+
+    public function isInternalServerError(): bool
+    {
+        return 500 === $this->statusCode;
+    }
+
+    public function isNotImplemented(): bool
+    {
+        return 501 === $this->statusCode;
+    }
+
+    public function isBadGateway(): bool
+    {
+        return 502 === $this->statusCode;
+    }
+
+    public function isServiceUnavailable(): bool
+    {
+        return 503 === $this->statusCode;
+    }
+
+    public function isGatewayTimeout(): bool
+    {
+        return 504 === $this->statusCode;
+    }
+
+    public function isHTTPVersionNotSupported(): bool
+    {
+        return 505 === $this->statusCode;
+    }
+
+    public function isVariantAlsoNegotiates(): bool
+    {
+        return 506 === $this->statusCode;
+    }
+
+    public function isInsufficientStorage(): bool
+    {
+        return 507 === $this->statusCode;
+    }
+
+    public function isLoopDetected(): bool
+    {
+        return 508 === $this->statusCode;
+    }
+
+    public function isNotExtended(): bool
+    {
+        return 510 === $this->statusCode;
+    }
+
+    public function isNetworkAuthenticationRequired(): bool
+    {
+        return 511 === $this->statusCode;
     }
 }

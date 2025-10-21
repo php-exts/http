@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Zeus\Http;
 
-use Zeus\Http\StatusCode;
+use Zeus\Http\Trait\StatusCode;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\RequestOptions;
 
@@ -162,6 +162,9 @@ class Adapter
         // POST
         'json'            => [],
         'body'            => [],
+        'form_params'     => [],
+        'multipart'       => [],
+        'cookies'         => [],
         'headers'         => [
             'User-Agent' => "Zeus/" . PHP_VERSION
         ]
