@@ -8,6 +8,10 @@ use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\RequestOptions;
 
 use Zeus\Exception\FileNotFoundException;
+use Zeus\Exception\InvalidArgumentException;
+
+!defined('CURL_HTTP_VERSION_3') && define('CURL_HTTP_VERSION_3', 3);
+!defined('CURL_HTTP_VERSION_3ONLY') && define('CURL_HTTP_VERSION_3ONLY', 3);
 
 /**
  * Http Client Adapter
@@ -29,23 +33,23 @@ class Adapter
      */
     public const string METHOD_CONNECT = 'CONNECT';
 
-    public const string METHOD_DELETE  = 'DELETE';
+    public const string METHOD_DELETE = 'DELETE';
 
-    public const string METHOD_GET     = 'GET';
+    public const string METHOD_GET = 'GET';
 
-    public const string METHOD_HEAD    = 'HEAD';
+    public const string METHOD_HEAD = 'HEAD';
 
     public const string METHOD_OPTIONS = 'OPTIONS';
 
-    public const string METHOD_PATCH   = 'PATCH';
+    public const string METHOD_PATCH = 'PATCH';
 
-    public const string METHOD_POST    = 'POST';
+    public const string METHOD_POST = 'POST';
 
-    public const string METHOD_PURGE   = 'PURGE';
+    public const string METHOD_PURGE = 'PURGE';
 
-    public const string METHOD_PUT     = 'PUT';
+    public const string METHOD_PUT = 'PUT';
 
-    public const string METHOD_TRACE   = 'TRACE';
+    public const string METHOD_TRACE = 'TRACE';
 
     /**
      * 当前请求方法类型 默认为 GET
@@ -75,6 +79,69 @@ class Adapter
         'PUT',
         'TRACE'
     ];
+
+    protected array $authMethods = [
+        'basic',
+        'digest',
+        'ntlm'
+    ];
+
+    protected $protocolVersions = [
+
+    ];
+
+    /**
+     * Curl Supported Protocol Versions
+     *
+     * @see https://www.php.net/manual/zh/curl.constants.php#constant.curl-http-version-1-0
+     * @var array
+     * @author CloudFlying
+     * @date 2025/10/19 14:20:55
+     */
+    protected array $curlProtocolVersions = [
+        '1.0'   => CURL_HTTP_VERSION_1_0, // (forces HTTP/1.0)
+        '1.1'   => CURL_HTTP_VERSION_1_1, // (forces HTTP/1.1)
+        '2'     => CURL_HTTP_VERSION_2, // (alias of CURL_HTTP_VERSION_2_0)
+        '2.0'   => CURL_HTTP_VERSION_2_0, // (attempts HTTP 2)
+        '2_tls' => CURL_HTTP_VERSION_2TLS, // (attempts HTTP 2 over TLS (HTTPS) only)
+        '2pk'   => CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE, // (issues non-TLS HTTP requests using HTTP/2 without HTTP/1.1 Upgrade).
+        '3'     => CURL_HTTP_VERSION_3, // (attempts HTTP 3) php 8.4
+        '3o'    => CURL_HTTP_VERSION_3ONLY, // (forces HTTP/3) php 8.4
+        '0'     => CURL_HTTP_VERSION_NONE, // (default, lets CURL decide which version to use)
+    ];
+
+    /**
+     * Curl Supported Method
+     *
+     * @var array
+     * @author CloudFlying
+     * @date 2025/10/19 13:40:43
+     */
+    protected array $curlAuthMethods = [
+        'any'          => CURLAUTH_ANY,
+        'anysafe'      => CURLAUTH_ANYSAFE,
+        'aws_sigv4'    => CURLAUTH_AWS_SIGV4,
+        'basic'        => CURLAUTH_BASIC,
+        'bearer'       => CURLAUTH_BEARER,
+        'digest'       => CURLAUTH_DIGEST,
+        'digest_ie'    => CURLAUTH_DIGEST_IE,
+        'gssapi'       => CURLAUTH_GSSAPI,
+        'gssnegotiate' => CURLAUTH_GSSNEGOTIATE,
+        'negotiate'    => CURLAUTH_NEGOTIATE,
+        'none'         => CURLAUTH_NONE,
+        'ntlm'         => CURLAUTH_NTLM,
+        'ntlm_wb'      => CURLAUTH_NTLM_WB,
+        'only'         => CURLAUTH_ONLY,
+    ];
+
+    /**
+     * Response Headers
+     *
+     * @var array
+     * @author CloudFlying
+     * @date 2025/10/19 10:48:25
+     */
+    protected array $responseHeaders = [];
 
     /**
      * Request Url
@@ -167,7 +234,9 @@ class Adapter
         'cookies'         => [],
         'headers'         => [
             'User-Agent' => "Zeus/" . PHP_VERSION
-        ]
+        ],
+        'cookie'          => [],
+        'version'         => '1.1',
     ];
 
     /**
@@ -282,17 +351,16 @@ class Adapter
     }
 
     /**
-     * Multiple Set Cookie
+     * Set Multiple Cookies
      *
      * @param array $cookies
      * @return static
      * @author imxieke <oss@live.hk>
-     * @date 2025/10/18 11:50:52
+     * @date 2025/10/19 13:02:38
      */
     public function withCookies(array $cookies)
     {
-        $this->cookies            = array_merge($this->cookies, $cookies);
-        $this->options['cookies'] = $cookies;
+        $this->cookies = array_merge($this->cookies, $cookies);
         return $this;
     }
 
@@ -349,12 +417,12 @@ class Adapter
      * Error: ['Content-type' => 'application/json']
      *
      * @param string $key Header Key
-     * @param string $value Header Value
+     * @param string|int|float $value Header Value
      * @return static
      * @author imxieke <oss@live.hk>
      * @date 2025/10/18 00:16:55
      */
-    public function withHeader(string $key, string $value)
+    public function withHeader(string $key, string|int|float $value)
     {
         $this->options['headers'][$key] = $value;
         return $this;
@@ -382,7 +450,7 @@ class Adapter
      * @author imxieke <oss@live.hk>
      * @date 2025/10/18 11:29:23
      */
-    public function withBearerHeader(string $token)
+    public function withBearerToken(string $token)
     {
         $this->withHeader("Authorization", "Bearer {$token}");
         return $this;
@@ -487,15 +555,51 @@ class Adapter
         return $this;
     }
 
-    public function withBasicAuth(string $username, string $password)
+    /**
+     * Basic Authentication
+     *
+     * @see http://www.ietf.org/rfc/rfc2069.txt
+     * @param string $username
+     * @param string $password
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/19 13:36:37
+     */
+    public function withAuthByBasic(string $username, string $password)
     {
-        $this->options['auth'] = [$username, $password];
+        $this->options['auth'] = [$username, $password, 'basic'];
         return $this;
     }
 
-    public function withDigestAuth(string $username, string $password)
+    /**
+     * Digest Authentication
+     *
+     * @see http://www.ietf.org/rfc/rfc2069.txt
+     * @param string $username
+     * @param string $password
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/19 13:36:01
+     */
+    public function withAuthByDigest(string $username, string $password)
     {
         $this->options['auth'] = [$username, $password, 'digest'];
+        return $this;
+    }
+
+    /**
+     * Microsoft NTLM authentication
+     *
+     * @see https://learn.microsoft.com/zh-cn/windows/win32/secauthn/microsoft-ntlm?redirectedfrom=MSDN
+     * @param string $username
+     * @param string $password
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/19 13:35:24
+     */
+    public function withAuthByNtlm(string $username, string $password)
+    {
+        $this->options['auth'] = [$username, $password, 'ntlm'];
         return $this;
     }
 
@@ -522,6 +626,20 @@ class Adapter
     public function withFollowLocation(bool $follow = false)
     {
         $this->followLocation = $follow;
+        return $this;
+    }
+
+    /**
+     * Set Http Protocol  Version
+     *
+     * @param string $version
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/19 14:15:35
+     */
+    public function withProtocolVersion(string $version)
+    {
+        $this->options['version'] = $version;
         return $this;
     }
 
@@ -589,5 +707,22 @@ class Adapter
     public function getContents()
     {
         return $this->body;
+    }
+
+    /**
+     * 获取 Response Header
+     *
+     * @param string $key
+     * @return array|mixed|string
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/19 11:07:20
+     */
+    public function getHeader(string $key = '')
+    {
+        if(empty($key)) {
+            return $this->responseHeaders;
+        }
+        $key = strtolower(trim($key));
+        return $this->responseHeaders[$key] ?? '';
     }
 }

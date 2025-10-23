@@ -16,6 +16,8 @@ use Zeus\Exception\MethodNotFoundException;
 use Zeus\Exception\InvalidParamException;
 use Zeus\Exception\ClassNotFoundException;
 use Zeus\Exception\ExtensionNotFoundException;
+use Zeus\Exception\FileNotFoundException;
+use Zeus\Exception\InvalidArgumentException;
 
 /**
  * Curl Client
@@ -98,19 +100,6 @@ class Curl extends Adapter
     }
 
     /**
-     * HTTP Basic Authentication.
-     *
-     * @param string $username
-     * @param string $password
-     * @return self
-     */
-    public function basicAuth(string $username, string $password)
-    {
-        $this->setOpt(CURLOPT_USERPWD, "$username:$password");
-        return $this;
-    }
-
-    /**
      * Set a proxy server for outgoing requests to tunnel through.
      * Http , Socks4 Socks4a Socks5
      *
@@ -140,25 +129,6 @@ class Curl extends Adapter
             $this->setOpt(CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
             $this->setOpt(CURLOPT_USERPWD, $auth);
         }
-        return $this;
-    }
-
-    /**
-     * Http Version
-     *
-     * CURL_HTTP_VERSION_NONE (default, lets CURL decide which version to use)
-     * CURL_HTTP_VERSION_1_0 (forces HTTP/1.0)
-     * CURL_HTTP_VERSION_1_1 (forces HTTP/1.1)
-     * CURL_HTTP_VERSION_2_0 (attempts HTTP 2)
-     * CURL_HTTP_VERSION_2 (alias of CURL_HTTP_VERSION_2_0)
-     * CURL_HTTP_VERSION_2TLS (attempts HTTP 2 over TLS (HTTPS) only)
-     * CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE (issues non-TLS HTTP requests using HTTP/2 without HTTP/1.1 Upgrade).
-     * @param int $version
-     * @return $this
-     */
-    public function setHttpVersion(int $version = CURL_HTTP_VERSION_NONE)
-    {
-        $this->setOpt(CURLOPT_HTTP_VERSION, $version);
         return $this;
     }
 
@@ -202,6 +172,38 @@ class Curl extends Adapter
     }
 
     /**
+     * Set Http Request Auth
+     *
+     * @throws InvalidParamException
+     * @return void
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/19 13:50:13
+     */
+    public function setAuth()
+    {
+        if(! empty($this->options['auth'])) {
+            [$user,$pass,$method] = $this->options['auth'];
+            if(! array_key_exists($method, $this->curlAuthMethods)) {
+                throw new InvalidParamException("Auth Method {$method} Not Supported");
+            }
+            $this->setOpt(CURLOPT_HTTPAUTH, $this->curlAuthMethods[$method]);
+            $auth = empty($pass) ? $user : "{$user}:{$pass}";
+            // match ($method) {
+            //     'any'          => $this->setOpt(CURLOPT_USERPWD, $auth),
+            //     'basic'        => $this->setOpt(CURLOPT_USERPWD, $auth),
+            //     'digest'       => $this->setOpt(CURLOPT_USERPWD, $auth),
+            //     'ntlm'         => $this->setOpt(CURLOPT_USERPWD, $auth),
+            //     'gssnegotiate' => $this->setOpt(CURLOPT_USERPWD, $auth),
+            //     'negotiate'    => $this->setOpt(CURLOPT_USERPWD, $auth),
+            //     'none'         => $this->setOpt(CURLOPT_USERPWD, $auth),
+            //     'ntlm_wb'      => $this->setOpt(CURLOPT_USERPWD, $auth),
+            //     'only'         => $this->setOpt(CURLOPT_USERPWD, $auth),
+            // };
+            $this->setOpt(CURLOPT_USERPWD, $auth);
+        }
+    }
+
+    /**
      * Build Http Request
      *
      * @param string $method HTTP Request Method
@@ -209,9 +211,17 @@ class Curl extends Adapter
      */
     public function build(string $method): void
     {
+        dump($this->options);
+        if (!array_key_exists($this->options['version'], $this->curlProtocolVersions)) {
+            throw new InvalidArgumentException("Protocol version {$this->options['version']} is not supported");
+        }
+
+        $this->setOpt(CURLOPT_HTTP_VERSION, $this->curlProtocolVersions[$this->options['version']]);
+
+        $this->setAuth();
         if($method == 'GET') {
             $this->setOpt(CURLOPT_HTTPGET, true);
-            if(!empty($this->options['query'])) {
+            if(! empty($this->options['query'])) {
                 $this->url .= '?' . http_build_query($this->options['query']);
                 $this->setOpt(CURLOPT_URL, $this->url);
             }
@@ -239,14 +249,28 @@ class Curl extends Adapter
         $this->setOpt(CURLOPT_CONNECTTIMEOUT, $this->options['timeout']);
         $this->setOpt(CURLOPT_SSL_VERIFYPEER, $this->verifySsl);
         $this->setOpt(CURLOPT_FOLLOWLOCATION, $this->followLocation);
-        $this->setOpt(CURLOPT_HTTPHEADER, $this->options['headers']);
         $this->setOpt(CURLOPT_VERBOSE, $this->debug);
+        $this->setOpt(CURLAUTH_BEARER, "doaihsldhaslhdlas");
+
+        if(! empty($this->options['headers'])) {
+            $headers = [];
+            foreach($this->options['headers'] as $key => $value) {
+                $headers[] = "{$key}:{$value}";
+            }
+            $this->setOpt(CURLOPT_HTTPHEADER, $headers);
+        }
+
         if(! empty($this->options['cookie_file'])) {
             $this->setOpt(CURLOPT_COOKIEFILE, $this->options['cookie_file']);
             $this->setOpt(CURLOPT_COOKIEJAR, $this->options['cookie_file']);
         }
-        if(! empty($this->options['cookie'])) {
-            $this->setOpt(CURLOPT_COOKIE, $this->options['cookie']);
+
+        if(! empty($this->cookies)) {
+            $cookies = '';
+            foreach($this->cookies as $name => $value) {
+                $cookies .= $name . '=' . $value . '; ';
+            }
+            $this->setOpt(CURLOPT_COOKIE, $cookies);
         }
         if(! empty($this->options['headers']['Referer'])) {
             $this->setOpt(CURLOPT_REFERER, $this->options['headers']['Referer']);
@@ -261,34 +285,53 @@ class Curl extends Adapter
      * @param string $method Request Method
      * @param string|null $uri    Request Url
      * @param array $options Request Options
-     * @return $this
+     * @return Curl
      * @author imxieke <oss@live.hk>
      * @copyright (c) 2024 CloudFlying
      */
-    public function request(string $method = 'GET', ?string $uri = null, array $options = [])
+    public function request(string $method = 'GET', ?string $uri = NULL, array $options = []): Curl
     {
-        if (empty($this->options['base_uri']) && empty($uri)) {
+        if(empty($this->options['base_uri']) && empty($uri)) {
             throw new InvalidParamException("Uri Can't be null");
         }
 
-        if (!empty($uri)) {
+        if(! empty($uri)) {
             $this->url = strpos($uri, "://") ? $uri : $this->options['base_uri'] . $uri;
-        }else {
+        } else {
             $this->url = $this->options['base_uri'];
         }
 
         $this->build($method);
 
-        $this->body   = curl_exec($this->client);
-        if ($this->body === false) {
+        $this->body = curl_exec($this->client);
+        if($this->body === false) {
             $this->errno = curl_errno($this->client);
             $this->error = curl_error($this->client);
         }
 
-        $this->info  = curl_getinfo($this->client);
-        $this->httpCode = $this->info['http_code'] ?? 200;
+        $this->info      = curl_getinfo($this->client);
+        $this->httpCode  = $this->info['http_code'] ?? 200;
+        $headerSize      = curl_getinfo($this->client, CURLINFO_HEADER_SIZE);
+        $responseHeaders = substr($this->body, 0, $headerSize);
+        $headers         = explode("\r\n", $responseHeaders) ?? [];
 
-        // dump(curl_getinfo($this->client, CURLINFO_HEADER_SIZE));
+        foreach($headers as $headerLine) {
+            $headerLine = trim($headerLine);
+            if(empty($headerLine)) {
+                continue;
+            }
+
+            $headerParts = explode(':', $headerLine, 2);
+            if(count($headerParts) !== 2) {
+                continue;
+            }
+
+            [$headerName, $headerValue]         = $headerParts;
+            $headerName                         = strtolower(trim($headerName));
+            $this->responseHeaders[$headerName] = trim($headerValue);
+        }
+
+        $this->body = substr($this->body, $headerSize);
 
         $this->close();
         return $this;
@@ -347,7 +390,7 @@ class Curl extends Adapter
     public function __call($method, $args)
     {
         $method = strtoupper(trim($method));
-        if(!in_array($method, $this->methods)) {
+        if(! in_array($method, $this->methods)) {
             throw new MethodNotFoundException("Unknow Method $method", 1);
         }
         return $this->request($method, ...$args);
