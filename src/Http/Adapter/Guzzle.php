@@ -5,21 +5,37 @@ namespace Zeus\Http\Adapter;
 
 use Zeus\Http\Adapter;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\HandlerStack;
+use GuzzleHttp\{
+    Client,
+    HandlerStack,
+    Pool,
+};
 use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Message\Response;
-use GuzzleHttp\Cookie\CookieJar;
-use GuzzleHttp\Cookie\FileCookieJar;
-use GuzzleHttp\Cookie\SessionCookieJar;
-use Psr\Http\Message\UriInterface;
-use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Event\CompleteEvent;
-use GuzzleHttp\Event\MessageCompleteEvent;
+use GuzzleHttp\Cookie\{
+    CookieJar,
+    FileCookieJar,
+    SessionCookieJar
+};
+use Psr\Http\Message\{
+    MessageInterface,
+    RequestInterface,
+    ResponseInterface,
+    ServerRequestInterface,
+    StreamInterface,
+    UploadedFileInterface,
+    UriInterface
+};
+use GuzzleHttp\Event\{
+    CompleteEvent,
+    MessageCompleteEvent,
+};
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use GuzzleHttp\Psr7\Response as Psr7Response;
 

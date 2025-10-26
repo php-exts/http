@@ -223,6 +223,7 @@ class Adapter
         'timeout'         => 10,
         'allow_redirects' => true,
         'http_errors'     => false,
+        'stream'          => false,
         'verify'          => true,
         // GET
         'query'           => [],
@@ -552,6 +553,19 @@ class Adapter
     public function withError(bool $error = true)
     {
         $this->options['http_errors'] = $error;
+        return $this;
+    }
+
+    /**
+     * 启用时会将响应体作为数据流输出。
+     *
+     * @author imxieke <oss@live.hk>
+     * @param bool $stream
+     * @return $this
+     */
+    public function withStream(bool $stream = true)
+    {
+        $this->options['stream'] = $stream;
         return $this;
     }
 
