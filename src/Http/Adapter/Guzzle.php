@@ -31,7 +31,7 @@ use GuzzleHttp\Event\{
     CompleteEvent,
     MessageCompleteEvent,
 };
-use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Utils as Psr7Utils;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Exception\GuzzleException;

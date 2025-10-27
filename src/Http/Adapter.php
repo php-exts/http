@@ -10,8 +10,8 @@ use GuzzleHttp\RequestOptions;
 use Zeus\Exception\FileNotFoundException;
 use Zeus\Exception\InvalidArgumentException;
 
-!defined('CURL_HTTP_VERSION_3') && define('CURL_HTTP_VERSION_3', 3);
-!defined('CURL_HTTP_VERSION_3ONLY') && define('CURL_HTTP_VERSION_3ONLY', 3);
+! defined('CURL_HTTP_VERSION_3') && define('CURL_HTTP_VERSION_3', 3);
+! defined('CURL_HTTP_VERSION_3ONLY') && define('CURL_HTTP_VERSION_3ONLY', 3);
 
 /**
  * Http Client Adapter
@@ -166,12 +166,6 @@ class Adapter
     public int $maxRedirects = 3;
 
     /**
-     * Allow Redirect
-     * @var bool
-     */
-    public bool $allowRedirect = false;
-
-    /**
      * Follow Redirect
      * @var bool
      */
@@ -221,7 +215,7 @@ class Adapter
     protected array $options = [
         'base_uri'        => '',
         'timeout'         => 10,
-        'allow_redirects' => true,
+        'allow_redirects' => false,
         'http_errors'     => false,
         'stream'          => false,
         'verify'          => true,
@@ -239,6 +233,15 @@ class Adapter
         'cookie'          => [],
         'version'         => '1.1',
     ];
+
+    /**
+     * Response Object
+     *
+     * @var ResponseInterface
+     * @author CloudFlying
+     * @date 2025/10/17 19:22:39
+     */
+    protected ResponseInterface $response;
 
     /**
      * Result Body Content
@@ -309,15 +312,6 @@ class Adapter
      * @date 2025/10/18 11:21:30
      */
     protected bool $showHeaderInfo = false;
-
-    /**
-     * Response Object
-     *
-     * @var ResponseInterface
-     * @author CloudFlying
-     * @date 2025/10/17 19:22:39
-     */
-    protected ResponseInterface $response;
 
     /**
      * Http Client Handle
@@ -660,12 +654,18 @@ class Adapter
     /**
      * Allow Redirect
      *
-     * @param $redirect true or false, default is false
+     * @param array $options
      * @return object
      */
-    public function allowRedirect(bool $redirect = false): object
+    public function withRedirect(array $options): object
     {
-        $this->allowRedirect = $redirect;
+        $this->options['allow_redirects'] = [
+            'max'             => $options['max'] ?? 5,
+            'strict'          => $options['strict'] ?? false,
+            'referer'         => $options['referer'] ?? false,
+            'protocols'       => $options['protocols'] ?? ['http', 'https'],
+            'track_redirects' => $options['track_redirects'] ?? false
+        ];
         return $this;
     }
 
