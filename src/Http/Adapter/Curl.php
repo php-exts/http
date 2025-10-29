@@ -121,18 +121,6 @@ class Curl extends Adapter
     }
 
     /**
-     * return Request Body
-     *
-     * @return bool|string
-     * @author imxieke <oss@live.hk>
-     * @copyright (c) 2024 CloudFlying
-     */
-    public function body()
-    {
-        return $this->body;
-    }
-
-    /**
      * Set Http Request Auth
      *
      * @throws InvalidParamException
@@ -296,34 +284,5 @@ class Curl extends Adapter
 
         curl_close($this->client);
         return $this;
-    }
-
-    /**
-     * toString
-     *
-     * @return string
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/18 15:41:51
-     */
-    public function __toString()
-    {
-        return $this->body;
-    }
-
-    /**
-     * Http Request Method
-     * @param mixed $method
-     * @param mixed $args
-     * @return array|string|object|$this
-     * @author imxieke <oss@live.hk>
-     * @copyright (c) 2024 CloudFlying
-     */
-    public function __call($method, $args)
-    {
-        $method = strtoupper(trim($method));
-        if(! in_array($method, $this->methods)) {
-            throw new MethodNotFoundException("Unknow Method $method", 1);
-        }
-        return $this->request($method, ...$args);
     }
 }

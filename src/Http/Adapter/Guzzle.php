@@ -27,36 +27,15 @@ use Psr\Http\Message\{
     UploadedFileInterface,
     UriInterface
 };
-use GuzzleHttp\Event\{
-    CompleteEvent,
-    MessageCompleteEvent,
-};
-use GuzzleHttp\Psr7\Utils as Psr7Utils;
-use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Request as Psr7Request;
-use GuzzleHttp\Psr7\Response as Psr7Response;
 
 /**
  * Guzzle Http Adapter
- *
- * @method ResponseInterface get(string|UriInterface $uri, array $options = []) Create and send an HTTP GET request.
- * @method ResponseInterface head(string|UriInterface $uri, array $options = []) Create and send an HTTP GET request.
- * @method ResponseInterface put(string|UriInterface $uri, array $options = []) Create and send an HTTP GET request.
- * @method ResponseInterface delete(string|UriInterface $uri, array $options = []) Create and send an HTTP GET request.
- * @method ResponseInterface patch(string|UriInterface $uri, array $options = []) Create and send an HTTP GET request.
- * @method ResponseInterface connect(string|UriInterface $uri, array $options = []) Create and send an HTTP GET request.
- * @method ResponseInterface options(string|UriInterface $uri, array $options = []) Create and send an HTTP GET request.
- * @method ResponseInterface post(string|UriInterface $uri, array $options = []) Create and send an HTTP POST request.
  *
  * @author imxieke <oss@live.hk>
  * @copyright (c) 2025 CloudFlying
  * @date 2025/10/17 19:02:13
  */
-class Guzzle extends Adapter
+class Guzzle
 {
     /**
      * Http Client Handler
@@ -67,9 +46,11 @@ class Guzzle extends Adapter
      */
     protected $client;
 
+    protected array $options = [];
+
     public function __construct(array $options = [])
     {
-        $options = array_merge($this->options, $options);
+        $this->options = array_merge($this->options, $options);
         $this->client = new Client($this->options);
     }
 
@@ -100,77 +81,9 @@ class Guzzle extends Adapter
      * @author imxieke <oss@live.hk>
      * @date 2025/10/17 18:37:18
      */
-    public function request(string $method, string|UriInterface $uri, array $options = []): self
+    public function request(string $method, string|UriInterface $uri, array $options = []): ResponseInterface
     {
-        $options = array_merge($this->options, $options);
-        $this->response = $this->client->request($method, $uri, $options);
-        dump($this->response->getBody()->getContents());
-        return $this;
-    }
-
-    /**
-     * 获取请求状态码
-     *
-     * @return int
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/17 19:31:33
-     */
-    public function getStatusCode()
-    {
-        return $this->response->getStatusCode();
-    }
-
-    /**
-     * 获取请求结果对象
-     *
-     * @return StreamInterface
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/17 19:29:53
-     */
-    public function getBody(): StreamInterface
-    {
-        return $this->response->getBody();
-    }
-
-    /**
-     * Query Response Contents
-     *
-     * @return string
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/17 19:32:36
-     */
-    public function getContents(): string
-    {
-        return $this->response->getBody()->getContents();
-    }
-
-    /**
-     * Result Convert to String
-     *
-     * @return string
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/17 19:27:44
-     */
-    public function __toString()
-    {
-        return $this->response->getBody()->getContents();
-    }
-
-    /**
-     *
-     * @param mixed $name
-     * @param mixed $args
-     * @return ResponseInterface
-     * @throws \BadMethodCallException
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/17 19:20:15
-     */
-    public function __call($name, $args)
-    {
-        $method = strtoupper(trim($name));
-        if(!in_array($method, $this->methods)) {
-            throw new \BadMethodCallException("Undefined method: $name");
-        }
-        return $this->request($method, ...$args);
+        $this->options = array_merge($this->options, $options);
+        return $this->client->request($method, $uri, $this->options);
     }
 }

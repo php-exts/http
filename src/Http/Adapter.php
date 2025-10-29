@@ -5,6 +5,7 @@ namespace Zeus\Http;
 
 use Zeus\Trait\StatusCode;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use GuzzleHttp\RequestOptions;
 
 use Zeus\Exception\FileNotFoundException;
@@ -755,18 +756,6 @@ class Adapter
     }
 
     /**
-     * Get Response Content
-     *
-     * @return string
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/18 15:34:31
-     */
-    public function getContents()
-    {
-        return $this->body;
-    }
-
-    /**
      * 获取 Response Header
      *
      * @param string $key
@@ -781,5 +770,53 @@ class Adapter
         }
         $key = strtolower(trim($key));
         return $this->responseHeaders[$key] ?? '';
+    }
+
+    /**
+     * 获取请求结果对象
+     *
+     * @return StreamInterface
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/17 19:29:53
+     */
+    public function getBody(): StreamInterface
+    {
+        return $this->response->getBody();
+    }
+
+    /**
+     * 获取请求状态码
+     *
+     * @return int
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/17 19:31:33
+     */
+    public function getStatusCode()
+    {
+        return $this->response->getStatusCode();
+    }
+
+    /**
+     * Get Response Contents
+     *
+     * @return string
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/17 19:32:36
+     */
+    public function getContents(): string
+    {
+        return $this->response->getBody()->getContents();
+    }
+
+    /**
+     * Result Convert to String
+     *
+     * @return string
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/17 19:27:44
+     */
+    public function __toString()
+    {
+        return $this->response->getBody()->getContents();
     }
 }
