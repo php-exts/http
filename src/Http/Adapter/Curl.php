@@ -53,18 +53,6 @@ class Curl extends Adapter
     public function __construct(array $options = [])
     {
         $this->options = array_merge($this->options, $options);
-        $this->init();
-    }
-
-    /**
-     * Instance Curl
-     *
-     * @author imxieke <oss@live.hk>
-     * @copyright (c) 2024 CloudFlying
-     * @return void
-     */
-    protected function init()
-    {
         if(! function_exists('curl_init')) {
             throw new ExtensionNotFoundException("Curl Client Extension Not Found", 1);
         }
@@ -145,33 +133,6 @@ class Curl extends Adapter
     }
 
     /**
-     * Return Request Info
-     *
-     * @param string $key 获取指定 key 的信息
-     * @author imxieke <oss@live.hk>
-     * @copyright (c) 2024 CloudFlying
-     * @return array|string
-     */
-    public function info(string $key)
-    {
-        if(! empty($this->info[$key])) {
-            return $this->info[$key];
-        }
-        return $this->info;
-    }
-
-    /**
-     * Return Error When has error will return error msg
-     * @return string
-     * @author imxieke <oss@live.hk>
-     * @copyright (c) 2024 CloudFlying
-     */
-    public function error()
-    {
-        return $this->errno . '' . $this->error;
-    }
-
-    /**
      * Set Http Request Auth
      *
      * @throws InvalidParamException
@@ -248,9 +209,9 @@ class Curl extends Adapter
         $this->setOpt(CURLOPT_TIMEOUT, $this->options['timeout']);
         $this->setOpt(CURLOPT_CONNECTTIMEOUT, $this->options['timeout']);
         $this->setOpt(CURLOPT_SSL_VERIFYPEER, $this->verifySsl);
-        $this->setOpt(CURLOPT_FOLLOWLOCATION, $this->followLocation);
-        $this->setOpt(CURLOPT_VERBOSE, $this->debug);
-        $this->setOpt(CURLAUTH_BEARER, "doaihsldhaslhdlas");
+        $this->setOpt(CURLOPT_FOLLOWLOCATION, $this->options['allow_redirects'] != false);
+        $this->setOpt(CURLOPT_MAXREDIRS, $this->options['allow_redirects']['max'] ?? 3);
+        $this->setOpt(CURLOPT_VERBOSE, $this->options['debug']);
 
         if(! empty($this->options['headers'])) {
             $headers = [];
@@ -333,38 +294,8 @@ class Curl extends Adapter
 
         $this->body = substr($this->body, $headerSize);
 
-        $this->close();
-        return $this;
-    }
-
-    /**
-     * Closing the current open curl resource.
-     * @return void
-     */
-    public function close()
-    {
         curl_close($this->client);
-    }
-
-    /**
-     * Curl Supported Protocols
-     *
-     * @author imxieke <oss@live.hk>
-     * @date 2025/10/18 13:10:12
-     */
-    public function getProtocols(): array
-    {
-        return curl_version()['protocols'] ?? [];
-    }
-
-    /**
-     * Curl Client Version
-     *
-     * @return string
-     */
-    public function version(): string
-    {
-        return curl_version()['version'] ?? '';
+        return $this;
     }
 
     /**

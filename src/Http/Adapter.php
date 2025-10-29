@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Zeus\Http;
 
-use Zeus\Http\Trait\StatusCode;
+use Zeus\Trait\StatusCode;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\RequestOptions;
 
@@ -160,18 +160,6 @@ class Adapter
     protected array $cookies = [];
 
     /**
-     * Set Max Redirect times
-     * @var int
-     */
-    public int $maxRedirects = 3;
-
-    /**
-     * Follow Redirect
-     * @var bool
-     */
-    public bool $followLocation = false;
-
-    /**
      * Verify SSL Info
      *
      * @var bool
@@ -179,15 +167,6 @@ class Adapter
      * @date 2025/10/18 11:31:59
      */
     protected bool $verifySsl = true;
-
-    /**
-     * More Verbose Message
-     *
-     * @var bool
-     * @author CloudFlying
-     * @date 2025/10/18 11:44:10
-     */
-    protected bool $debug = false;
 
     /**
      * Http Request Errors
@@ -219,13 +198,7 @@ class Adapter
         'http_errors'     => false,
         'stream'          => false,
         'verify'          => true,
-        // GET
-        'query'           => [],
-        // POST
-        'json'            => [],
-        'body'            => [],
-        'form_params'     => [],
-        'multipart'       => [],
+        'debug'           => false,
         'cookies'         => [],
         'headers'         => [
             'User-Agent' => "Zeus/" . PHP_VERSION
@@ -328,6 +301,31 @@ class Adapter
     }
 
     /**
+     * Cert
+     *
+     * @param array $options
+     * @throws InvalidArgumentException
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/29 10:16:28
+     */
+    public function withCert(array $options)
+    {
+        if (!empty($options['path'])) {
+            $options['path'] = realpath($options['path']);
+            if (!file_exists($options['path'])) {
+                throw new InvalidArgumentException("Cert Not Found: {$options['path']}");
+            }
+        }
+
+        $this->options['cert'] = [
+            $options['path'],
+            $options['password'] ?? ''
+        ];
+        return $this;
+    }
+
+    /**
      * Set Request Cookie
      *
      * string: "key=val;key2=val2;key3=val3"
@@ -387,7 +385,47 @@ class Adapter
      */
     public function withDebug(bool $debug = true)
     {
-        $this->debug = $debug;
+        $this->options['debug'] = $debug;
+        return $this;
+    }
+
+    /**
+     * Delay N second before sending the request.
+     *
+     * @param int|float $delay
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/29 10:27:05
+     */
+    public function withDelay(int|float $delay = 1)
+    {
+        $this->options['delay'] = $delay;
+        return $this;
+    }
+
+    /**
+     * Force resolve host name to IPv4.
+     *
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/29 10:28:51
+     */
+    public function withIpv4()
+    {
+        $this->options['force_ip_resolve'] = 'v4';
+        return $this;
+    }
+
+    /**
+     * Force resolve host name to IPv6.
+     *
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/29 10:30:22
+     */
+    public function withIpv6()
+    {
+        $this->options['force_ip_resolve'] = 'v6';
         return $this;
     }
 
@@ -489,6 +527,7 @@ class Adapter
     public function withTimeout(int|float $timeout)
     {
         $this->options['timeout'] = $timeout;
+        $this->options['connect_timeout'] = $timeout;
         return $this;
     }
 
@@ -503,6 +542,34 @@ class Adapter
     public function withBody(array $body)
     {
         $this->options['body'] = $body;
+        return $this;
+    }
+
+    /**
+     * Sets the body of the request to a multipart/form-data form.
+     *
+     * @param array $form
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/29 10:34:27
+     */
+    public function withMultipart(array $form)
+    {
+        $this->options['multipart'] = $form;
+        return $this;
+    }
+
+    /**
+     * Used to send an application/x-www-form-urlencoded POST request.
+     *
+     * @param array $form
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/29 10:35:25
+     */
+    public function withForm(array $form)
+    {
+        $this->options['form_params'] = $form;
         return $this;
     }
 
@@ -544,7 +611,7 @@ class Adapter
      * @author imxieke <oss@live.hk>
      * @date 2025/10/18 00:23:22
      */
-    public function withError(bool $error = true)
+    public function withErrors(bool $error = true)
     {
         $this->options['http_errors'] = $error;
         return $this;
@@ -598,7 +665,7 @@ class Adapter
     /**
      * Microsoft NTLM authentication
      *
-     * @see https://learn.microsoft.com/zh-cn/windows/win32/secauthn/microsoft-ntlm?redirectedfrom=MSDN
+     * @see https://learn.microsoft.com/zh-cn/windows/win32/secauthn/microsoft-ntlm
      * @param string $username
      * @param string $password
      * @return static
@@ -626,18 +693,6 @@ class Adapter
     }
 
     /**
-     * Follow Location Redirect
-     *
-     * @param bool $follow
-     * @return self
-     */
-    public function withFollowLocation(bool $follow = false)
-    {
-        $this->followLocation = $follow;
-        return $this;
-    }
-
-    /**
      * Set Http Protocol  Version
      *
      * @param string $version
@@ -660,7 +715,7 @@ class Adapter
     public function withRedirect(array $options): object
     {
         $this->options['allow_redirects'] = [
-            'max'             => $options['max'] ?? 5,
+            'max'             => $options['max'] ?? 3,
             'strict'          => $options['strict'] ?? false,
             'referer'         => $options['referer'] ?? false,
             'protocols'       => $options['protocols'] ?? ['http', 'https'],
@@ -696,18 +751,6 @@ class Adapter
     public function verifySsl(bool $verify = true)
     {
         $this->verifySsl = $verify;
-        return $this;
-    }
-
-    /**
-     * Allow Max Redirect times
-     *
-     * @param int $maxRedirects
-     * @return $this
-     */
-    public function setMaxRedirects(int $maxRedirects = 3): object
-    {
-        $this->maxRedirects = $maxRedirects;
         return $this;
     }
 

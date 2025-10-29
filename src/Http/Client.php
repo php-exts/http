@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace Zeus\Http;
 
-use Zeus\Http\Driver\Curl;
+use Zeus\Http\Adapter\Curl;
+use Zeus\Http\Adapter\Guzzle;
+use Zeus\Http\Adapter\Stream;
+use Zeus\Exception\ClassNotFoundException;
 use Zeus\Exception\MethodNotFoundException;
 
 /**
@@ -15,31 +18,19 @@ use Zeus\Exception\MethodNotFoundException;
  */
 class Client
 {
+    protected $driver;
 
-    public function __construct()
+    public function __construct($driver = Guzzle::class, array $options = [])
     {
-        // $this->ch = curl_init();
-    }
+        if(! class_exists($driver)) {
+            throw new ClassNotFoundException("{$driver} Driver class not found");
+        }
+        $this->driver = new $driver($options);
 
-    public function method(string $method)
-    {
-        $this->query([
-            'url'
-        ]);
     }
 
     public function __call(string $name, array $args)
     {
-        $method = strtoupper(trim($name));
-        switch ($method) {
-            case 'GET':
-                break;
-            case 'POST':
-                break;
-            case 'HEAD':
-                break;
-            default:
-                $this->method('GET');
-        }
+        return $this->driver->{$name}(...$args);
     }
 }

@@ -1,7 +1,7 @@
 <?php
 declare (strict_types = 1);
 
-namespace Zeus\Http\Trait;
+namespace Zeus\Trait;
 
 /**
  * Http Status Code

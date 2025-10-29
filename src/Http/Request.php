@@ -43,6 +43,27 @@ class Request
     ];
 
     /**
+     * HTTP request methods
+     *
+     * 501 Not Implemented LINK PURGE
+     *
+     * @see @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods
+     * @var array
+     */
+    protected array $methods = [
+        'CONNECT',
+        'DELETE',
+        'GET',
+        'HEAD',
+        'OPTIONS',
+        'PATCH',
+        'POST',
+        'PURGE',
+        'PUT',
+        'TRACE'
+    ];
+
+    /**
      * 获取 GET 请求参数
      *
      * @access protected
@@ -444,6 +465,7 @@ class Request
     {
         $realIp = '0.0.0.0';
         // 兼容 Webman
+        /** @suppress PHP0417 */
         if (class_exists('\Webman\Http\Request')) {
             $realIp = request()->getRealIp();
         }

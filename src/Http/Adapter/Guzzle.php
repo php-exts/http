@@ -32,6 +32,7 @@ use GuzzleHttp\Event\{
     MessageCompleteEvent,
 };
 use GuzzleHttp\Psr7\Utils as Psr7Utils;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -64,11 +65,12 @@ class Guzzle extends Adapter
      * @author CloudFlying
      * @date 2025/10/17 18:27:57
      */
-    protected Client $client;
+    protected $client;
 
-    public function __construct()
+    public function __construct(array $options = [])
     {
-        $this->client = new Client();
+        $options = array_merge($this->options, $options);
+        $this->client = new Client($this->options);
     }
 
     /**
@@ -100,7 +102,9 @@ class Guzzle extends Adapter
      */
     public function request(string $method, string|UriInterface $uri, array $options = []): self
     {
+        $options = array_merge($this->options, $options);
         $this->response = $this->client->request($method, $uri, $options);
+        dump($this->response->getBody()->getContents());
         return $this;
     }
 
