@@ -160,12 +160,12 @@ class Curl extends Adapter
      */
     public function build(string $method): void
     {
-        dump($this->options);
         if (!array_key_exists($this->options['version'], $this->curlProtocolVersions)) {
             throw new InvalidArgumentException("Protocol version {$this->options['version']} is not supported");
         }
 
         $this->setOpt(CURLOPT_HTTP_VERSION, $this->curlProtocolVersions[$this->options['version']]);
+        $this->setOpt(CURLOPT_CAINFO, $this->options['cert']['path']);
 
         $this->setAuth();
         if($method == 'GET') {

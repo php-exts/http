@@ -204,6 +204,9 @@ class Adapter
         'headers'         => [
             'User-Agent' => "Zeus/" . PHP_VERSION
         ],
+        'cert' => [
+            'path' => __DIR__ . '/../../vendor/composer/ca-bundle/res/cacert.pem'
+        ],
         'cookie'          => [],
         'version'         => '1.1',
     ];

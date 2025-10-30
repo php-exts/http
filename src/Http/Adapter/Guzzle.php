@@ -28,6 +28,8 @@ use Psr\Http\Message\{
     UriInterface
 };
 
+use Composer\CaBundle\CaBundle;
+
 /**
  * Guzzle Http Adapter
  *
@@ -50,6 +52,8 @@ class Guzzle
 
     public function __construct(array $options = [])
     {
+        $this->options['cert']['path'] = CaBundle::getBundledCaBundlePath();
+
         $this->options = array_merge($this->options, $options);
         $this->client = new Client($this->options);
     }
