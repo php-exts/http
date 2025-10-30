@@ -294,6 +294,14 @@ class Adapter
      */
     protected $client;
 
+    /**
+     * Base Uri
+     *
+     * @param string $uri
+     * @return static
+     * @author imxieke <oss@live.hk>
+     * @date 2025/10/30 10:02:58
+     */
     public function setBaseUri(string $uri)
     {
         $this->options['base_uri'] = $uri;
@@ -477,7 +485,7 @@ class Adapter
     }
 
     /**
-     * Set Http Request Bearer Header
+     * Bearer Authorization
      *
      * @param string $token
      * @return static
@@ -756,7 +764,7 @@ class Adapter
     }
 
     /**
-     * 获取 Response Header
+     * Query Response Header
      *
      * @param string $key
      * @return array|mixed|string
@@ -773,7 +781,7 @@ class Adapter
     }
 
     /**
-     * 获取请求结果对象
+     * Query Response Body
      *
      * @return StreamInterface
      * @author imxieke <oss@live.hk>
@@ -785,13 +793,13 @@ class Adapter
     }
 
     /**
-     * 获取请求状态码
+     * Query Response Status Code
      *
      * @return int
      * @author imxieke <oss@live.hk>
      * @date 2025/10/17 19:31:33
      */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return $this->response->getStatusCode();
     }

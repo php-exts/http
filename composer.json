@@ -26,6 +26,7 @@
     "ext-curl": "*",
     "composer/ca-bundle": "^1.5",
     "ext/exception": "^0.0.4",
+    "ext/support": "^0.0.1",
     "guzzlehttp/guzzle": "^7.10",
     "psr/http-message": "^2.0",
     "symfony/http-foundation": "^7.3"

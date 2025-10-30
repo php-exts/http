@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
+use Zeus\Http;
 use Zeus\Http\Client;
 
 $http = new Client([
@@ -42,3 +43,11 @@ dump($response->getBody()->getSize());
 
 // echo $response->getBody()->getContents();
 // dump($http);
+
+// Static Call
+$response = Http::setBaseUri("https://httpbin.org")
+    ->withQuery(['name' => 'ZhangSan'])
+    ->withUserAgent("Niubi1912")
+    ->get("/get");
+
+dump($response->getBody()->getContents());
