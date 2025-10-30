@@ -23,7 +23,7 @@ Homestead.json
 /vendors/*
 .phpunit.result.cache
 
-
+/composer.lock
 
 
 # Node

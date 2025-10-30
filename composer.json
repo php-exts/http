@@ -25,8 +25,8 @@
     "php": ">=8.2",
     "ext-curl": "*",
     "composer/ca-bundle": "^1.5",
-    "ext/exception": "^0.0.4",
-    "ext/support": "^0.0.1",
+    "ext/exception": "^1.0.3",
+    "ext/support": "^1.0",
     "guzzlehttp/guzzle": "^7.10",
     "psr/http-message": "^2.0",
     "symfony/http-foundation": "^7.3"
@@ -55,5 +55,11 @@
     "sort-packages": true,
     "process-timeout": 300,
     "optimize-autoloader": true
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://repo.packagist.org/"
+    }
   }
 }
